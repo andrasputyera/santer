@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrap">
+  <div id="page-wrap">
     <div class="grid-wrap">
       <div 
         v-for="product in products"
