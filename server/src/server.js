@@ -45,13 +45,11 @@ const products = [{
     averageRating: '8.9',
   }];
   
-  export const cartItems = [
+  export let cartItems = [
     products[0],
     products[2],
     products[3],
   ];
-
-
 
 const app = express();
 app.use(express.json());
@@ -74,17 +72,22 @@ app.get('/api/products/:productId', (req, res) => {
     }
 });
 
-// app.get('/hello', (req, res) => {
-//     res.send('Hello!');
-// });
+app.post('/api/users/:userId/cart', (req, res) => {
+    const { productId } = req.body;
+    const product = products.find((product) => product.id === productId);
+    if (product) {
+        cartItems.push(product);
+        res.status(200).json(cartItems);
+    } else {
+        res.status(404).json('Could not find the product!')
+    }
+});
 
-// app.post('/hello', (req, res) => {
-//     res.send(`Hello ${req.body.name}`)
-// });
-
-// app.get('/hello/:name', (req, res) => {
-//     res.send(`Hello ${req.params.name}!`);
-// });
+app.delete('/api/users/:userId/cart/:productId', (req, res) => {
+    const { productId } = req.params;
+    cartItems = cartItems.filter(product => product.id !== productId);
+    res.status(200).json(cartItems);
+});
 
 app.listen(8000, () => {
     console.log('Server is listening on port 8000');
