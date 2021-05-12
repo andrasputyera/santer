@@ -97,15 +97,25 @@ app.get('/api/products/:productId', async (req, res) => {
     client.close();
 });
 
-app.post('/api/users/:userId/cart', (req, res) => {
+app.post('/api/users/:userId/cart', async (req, res) => {
+    const { userId } = req.params;
     const { productId } = req.body;
-    const product = products.find((product) => product.id === productId);
-    if (product) {
-        cartItems.push(product);
-        res.status(200).json(cartItems);
-    } else {
-        res.status(404).json('Could not find the product!')
-    }
+    const client = await MongoClient.connect(
+      'mongodb://localhost:27017',
+      { useNewUrlParser: true, useUnifiedTopology: true },
+    );
+    const db = client.db('santer-db');
+
+    // MongoDB query
+    await db.collection('users').updateOne({ id: userId }, {
+      // Will not add duplicates of a product in the cart
+      $addToSet: { cartItems: productId },
+    });
+    const user = await db.collection('users').findOne({ id: userId });
+    const cartItemIds = user.cartItems;
+    const cartItems = cartItemIds.map(id => products.find(product => product.id === id));
+    res.status(200).json(cartItems);
+    client.close();  
 });
 
 app.delete('/api/users/:userId/cart/:productId', (req, res) => {
