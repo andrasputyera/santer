@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { products } from '../fake-data';
+import axios from 'axios';
 import NotFound from '../views/NotFound.vue';
 
 export default {
@@ -26,8 +26,14 @@ export default {
     },
     data() {
       return {
-        product: products.find((product) => product.id === this.$route.params.id)
+        // product: products.find((product) => product.id === this.$route.params.id)
+        product: {},
       }
+    },
+    async created() {
+      const result = await axios.get(`/api/products/${this.$route.params.id}`);
+      const product = result.data;
+      this.product = product;
     }
 }
 
